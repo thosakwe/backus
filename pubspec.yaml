@@ -1,0 +1,17 @@
+author: "Tobe O <thosakwe@gmail.com>"
+description: "Generates parsers in Dart from EBNF grammars. Edit"
+homepage: "https://github.com/thosakwe/backus.git"
+name: "backus"
+version: "0.0.0"
+dependencies:
+  build: "^0.7.0"
+  build_runner: "^0.3.0"
+  code_builder: "^1.0.0-alpha"
+  compiler_tools: "^1.0.0-dev"
+  inflection: "^0.4.1"
+  recase: "^1.0.0"
+  string_scanner: "^1.0.0"
+dev_dependencies: 
+  test: "^0.12.0"
+environment: 
+  sdk: ">=1.19.0"

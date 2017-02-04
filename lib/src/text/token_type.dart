@@ -1,0 +1,21 @@
+enum TokenType {
+  COMMENT,
+  EOF,
+  ILLEGAL,
+
+  COMMA,
+  CURLY_L,
+  CURLY_R,
+  EQUALS,
+  MINUS,
+  PAREN_L,
+  PAREN_R,
+  PIPE,
+  SEMI,
+  SQUARE_L,
+  SQUARE_R,
+
+  REGEX,
+  TERMINAL,
+  ID
+}

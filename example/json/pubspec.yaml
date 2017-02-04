@@ -1,0 +1,7 @@
+name: backus_json
+publish_to: none
+dependencies:
+  backus:
+    path: ../../
+dev_dependencies:
+  build_runner: ^0.3.0
