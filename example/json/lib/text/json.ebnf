@@ -4,3 +4,4 @@ id = /[A-Za-z_][A-Za-z0-9_]*/;
 pair = id, ":", expr;
 object = "{", { pair }, "}";
 expr = digit;
+plus = "+";

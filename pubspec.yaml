@@ -6,7 +6,8 @@ version: "0.0.0"
 dependencies:
   build: "^0.7.0"
   build_runner: "^0.3.0"
-  code_builder: "^1.0.0-alpha"
+  code_builder:
+    git: https://github.com/thosakwe/code_builder.git
   compiler_tools: "^1.0.0-dev"
   inflection: "^0.4.1"
   recase: "^1.0.0"

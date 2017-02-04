@@ -21,6 +21,7 @@ Currently only supports LL(1) grammars.
 * Builder
 * Add locals to rules
 * Visitor generator
+  * With anonymous visitor, kind of like Angel's `AnonymousService`
 
 # Notes
 * Implicit tokens

@@ -30,3 +30,7 @@ class ExprContext extends AstNode<TokenType> {
 
   ExprContext([span = null]) : super(span);
 }
+
+class PlusContext extends AstNode<TokenType> {
+  PlusContext([span = null]) : super(span);
+}

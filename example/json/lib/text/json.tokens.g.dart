@@ -2,7 +2,10 @@ library json.tokens;
 
 enum TokenType {
     ILLEGAL,
-    TOKEN_0,
-    TOKEN_1,
+    DIGIT,
+    ID,
     TOKEN_2,
+    TOKEN_3,
+    TOKEN_4,
+    PLUS,
 }

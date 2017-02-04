@@ -44,7 +44,7 @@ List<Token<TokenType>> lex(String text) {
       // If we find whitespace after an illegal entry, let's tack it
       // onto the previous one.
       if (tokens.isNotEmpty && tokens.last.type == TokenType.ILLEGAL) {
-        var cur = scanner.state;
+        /*var cur = scanner.state;
         int off = cur.position - start.offset,
             offCol = cur.column - start.column,
             offLine = cur.line - start.line;
@@ -52,7 +52,7 @@ List<Token<TokenType>> lex(String text) {
             line: start.line + offLine, column: start.column + offCol);
 
         var illegalStart = tokens.last.span.start,
-            illegalText = tokens.last.text;
+            illegalText = tokens.last.text;*/
         tokens.removeLast();
         /*tokens.add(new Token(TokenType.ILLEGAL,
             span: new SourceSpan(
