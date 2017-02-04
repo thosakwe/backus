@@ -28,4 +28,3 @@ Currently only supports LL(1) grammars.
   * i.e. if you come across a string in a parser rule, check if there is an existing token for it; otherwise, create new token type and sub it in
   * This will just make grammar writing faster ;)
 * Parse methods, as well as AST classes, should include source rules as comments
-
