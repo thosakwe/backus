@@ -3,16 +3,7 @@ library json.lexer;
 import 'package:backus/backus.dart';
 import 'json.tokens.g.dart';
 
-final Map<Pattern, TokenType> _patterns = {
-  new RegExp('0-9+'): TokenType.DIGIT,
-  new RegExp('[A-Za-z_][A-Za-z0-9_]*'): TokenType.ID,
-  ':': TokenType.TOKEN_2,
-  '{': TokenType.TOKEN_3,
-  '}': TokenType.TOKEN_4,
-  '+': TokenType.PLUS,
-  '=': TokenType.TOKEN_6,
-  '>': TokenType.TOKEN_7
-};
+final Map<Pattern, TokenType> _patterns = {'+': TokenType.PLUS};
 List<Token<TokenType>> lex(String text) {
   var scanner = new SpanScanner(text);
   List<Token<TokenType>> tokens = [];
