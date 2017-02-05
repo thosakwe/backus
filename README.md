@@ -1,6 +1,6 @@
 # backus
 Generates parsers in Dart from EBNF grammars.
-Currently only supports LL(1) grammars.
+Currently only supports LL(1) grammÏars, and only generates recursive descent parsers.
 
 # Goals
 * Generate recursive descent parsers
