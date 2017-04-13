@@ -8,7 +8,8 @@ expr = digit | sum;
 ''';
 
 main() {
-  test('wtf', () {
-    lex(MATH).where((t) => t.type != TokenType.ILLEGAL).forEach(print);
+  test('math', () {
+    var scanner = new Scanner()..scan(MATH);
+    scanner.tokens.forEach(print);
   });
 }

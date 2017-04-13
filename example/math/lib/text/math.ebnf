@@ -1,0 +1,4 @@
+skip-whitespace = /[ \n\r\t]+/;
+plus = "+";
+expr = digit | sum;
+sum = expr, plus, expr;

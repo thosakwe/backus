@@ -10,6 +10,7 @@ typedef RightHandSideContext InfixParselet(
     Parser parser, RightHandSideContext left, Token token);
 
 class Parser extends BaseParser<TokenType> {
+  final List<SyntaxError> errors = [];
   final Map<TokenType, PrefixParselet> prefixParselets = {};
   final Map<TokenType, InfixParselet> infixParselets = {};
 
@@ -30,10 +31,13 @@ class Parser extends BaseParser<TokenType> {
     infixParselets[TokenType.PIPE] = (parser, left, token) {
       var right = parseRightHandSide();
 
-      if (right == null)
-        throw new SyntaxError(
-            'Expected right-hand-side within alternation, found \'${current?.text}\' instead.',
-            offendingToken: current);
+      if (right == null) {
+        errors.add(new SyntaxError(
+            'Expected right-hand-side within alternation, found \'${current
+                ?.text}\' instead.',
+            offendingToken: current));
+        return null;
+      }
 
       return new AlternationContext(left, right);
     };
@@ -41,10 +45,13 @@ class Parser extends BaseParser<TokenType> {
     infixParselets[TokenType.COMMA] = (parser, left, token) {
       var right = parseRightHandSide();
 
-      if (right == null)
-        throw new SyntaxError(
-            'Expected right-hand-side within concatenation, found \'${current?.text}\' instead.',
-            offendingToken: current);
+      if (right == null) {
+        errors.add(new SyntaxError(
+            'Expected right-hand-side within concatenation, found \'${current
+                ?.text}\' instead.',
+            offendingToken: current));
+        return null;
+      }
 
       return new ConcatenationContext(left, right);
     };
@@ -64,9 +71,11 @@ class Parser extends BaseParser<TokenType> {
       rule = parseRule();
     }
 
-    if (rules.isEmpty)
-      throw new SyntaxError('Grammars must have at least one rule.',
-          offendingToken: current);
+    if (rules.isEmpty) {
+      errors.add(new SyntaxError('Grammars must have at least one rule.',
+          offendingToken: current));
+      return null;
+    }
 
     return new GrammarContext(rules);
   }
@@ -75,19 +84,28 @@ class Parser extends BaseParser<TokenType> {
     var left = parseLeftHandSide();
     if (left == null) return null;
 
-    if (!next(TokenType.EQUALS)) throw expectedType(TokenType.EQUALS);
+    if (!next(TokenType.EQUALS)) {
+      errors.add(expectedType(TokenType.EQUALS));
+      return null;
+    }
 
     var right = parseRightHandSide();
 
-    if (right == null)
-      throw new SyntaxError(
+    if (right == null) {
+      errors.add(new SyntaxError(
           'Expected right-hand side, found \'${current?.text}\' instead.',
-          offendingToken: current);
+          offendingToken: current));
+      return null;
+    }
 
     /* print('Current in RHS: ${current?.type} -> ${current?.text}');
     print('Next: ${peek()?.type} -> ${peek()?.text}'); */
 
-    if (!next(TokenType.SEMI)) throw expectedType(TokenType.SEMI);
+    if (!next(TokenType.SEMI)) {
+      errors.add(expectedType(TokenType.SEMI));
+      return null;
+    }
+
     return new RuleContext(left, right);
   }
 
@@ -100,7 +118,10 @@ class Parser extends BaseParser<TokenType> {
     var token = peek();
     var prefix = prefixParselets[token.type];
 
-    if (prefix == null) throw error('Could not parse \'${token.text}\'.');
+    if (prefix == null) {
+      errors.add(error('Could not parse \'${token.text}\'.'));
+      return null;
+    }
 
     RightHandSideContext left = prefix(this, token);
 
@@ -128,12 +149,19 @@ class Parser extends BaseParser<TokenType> {
     if (!next(TokenType.SQUARE_L)) return null;
     var context = parseRightHandSide();
 
-    if (context == null)
-      throw new SyntaxError(
-          'Expected right-hand-side within optional, found \'${current?.text}\' instead.',
-          offendingToken: current);
+    if (context == null) {
+      errors.add(new SyntaxError(
+          'Expected right-hand-side within optional, found \'${current
+              ?.text}\' instead.',
+          offendingToken: current));
+      return null;
+    }
 
-    if (!next(TokenType.SQUARE_R)) throw expectedType(TokenType.SQUARE_R);
+    if (!next(TokenType.SQUARE_R)) {
+      errors.add(expectedType(TokenType.SQUARE_R));
+      return null;
+    }
+
     return new OptionalContext(context);
   }
 
@@ -141,12 +169,17 @@ class Parser extends BaseParser<TokenType> {
     if (!next(TokenType.CURLY_L)) return null;
     var context = parseRightHandSide();
 
-    if (context == null)
-      throw new SyntaxError(
+    if (context == null) {
+      errors.add(new SyntaxError(
           'Expected right-hand-side within repetition, found \'${current?.text}\' instead.',
-          offendingToken: current);
+          offendingToken: current));
+      return null;
+    }
 
-    if (!next(TokenType.CURLY_R)) throw expectedType(TokenType.CURLY_R);
+    if (!next(TokenType.CURLY_R)) {
+      errors.add(expectedType(TokenType.CURLY_R));
+      return null;
+    }
     return new RepetitionContext(context);
   }
 
@@ -154,12 +187,19 @@ class Parser extends BaseParser<TokenType> {
     if (!next(TokenType.PAREN_L)) return null;
     var context = parseRightHandSide();
 
-    if (context == null)
-      throw new SyntaxError(
-          'Expected right-hand-side within group, found \'${current?.text}\' instead.',
-          offendingToken: current);
+    if (context == null) {
+      errors.add(new SyntaxError(
+          'Expected right-hand-side within group, found \'${current
+              ?.text}\' instead.',
+          offendingToken: current));
+      return null;
+    }
 
-    if (!next(TokenType.PAREN_R)) throw expectedType(TokenType.PAREN_R);
+    if (!next(TokenType.PAREN_R)) {
+      errors.add(expectedType(TokenType.PAREN_R));
+      return null;
+    }
+
     return new GroupContext(context);
   }
 
@@ -169,10 +209,12 @@ class Parser extends BaseParser<TokenType> {
     if (!next(TokenType.PIPE)) return null;
     var right = parseRightHandSide();
 
-    if (right == null)
-      throw new SyntaxError(
+    if (right == null) {
+      errors.add(new SyntaxError(
           'Expected right-hand-side within alternation, found \'${current?.text}\' instead.',
-          offendingToken: current);
+          offendingToken: current));
+      return null;
+    }
 
     return new AlternationContext(left, right);
   }
@@ -183,10 +225,12 @@ class Parser extends BaseParser<TokenType> {
     if (!next(TokenType.COMMA)) return null;
     var right = parseRightHandSide();
 
-    if (right == null)
-      throw new SyntaxError(
+    if (right == null) {
+      errors.add(new SyntaxError(
           'Expected right-hand-side within concatenation, found \'${current?.text}\' instead.',
-          offendingToken: current);
+          offendingToken: current));
+      return null;
+    }
 
     return new ConcatenationContext(left, right);
   }

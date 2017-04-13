@@ -1,22 +1,40 @@
-/// Runtime for Backus-generated parsers.
-library backus;
-
 import 'package:compiler_tools/compiler_tools.dart';
 import 'package:string_scanner/string_scanner.dart';
-import 'package:source_span/source_span.dart';
-export 'package:compiler_tools/compiler_tools.dart';
-export 'package:string_scanner/string_scanner.dart';
-export 'package:source_span/source_span.dart';
+import 'token_type.dart';
 
-class BaseScanner<TokenType> {
+final RegExp _COMMENT = new RegExp(r'\(\*(.|\n)*\*\)');
+final RegExp _WHITESPACE = new RegExp(r'[ \r\t\n]+');
+final RegExp _TERMINAL1 = new RegExp(
+    r'"((\\(["\\/bfnrt]|(u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))|([^"\\]))*"');
+final RegExp _TERMINAL2 = new RegExp(
+    r"'((\\(['\\/bfnrt]|(u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))|([^'\\]))*'");
+final RegExp _ID =
+    new RegExp(r'[_A-Za-z](([A-Za-z0-9_])|(-[A-Za-z0-9][A-Za-z]))*');
+final RegExp _REGEX = new RegExp(r'/(\\/|[^/])+/i?');
+
+final Map<Pattern, TokenType> _patterns = {
+  ',': TokenType.COMMA,
+  '{': TokenType.CURLY_L,
+  '}': TokenType.CURLY_R,
+  '=': TokenType.EQUALS,
+  '-': TokenType.MINUS,
+  '(': TokenType.PAREN_L,
+  ')': TokenType.PAREN_R,
+  '|': TokenType.PIPE,
+  ';': TokenType.SEMI,
+  '[': TokenType.SQUARE_L,
+  ']': TokenType.SQUARE_R,
+  _COMMENT: TokenType.COMMENT,
+  _REGEX: TokenType.REGEX,
+  _TERMINAL1: TokenType.TERMINAL,
+  _TERMINAL2: TokenType.TERMINAL,
+  _ID: TokenType.ID
+};
+
+class Scanner {
   LineScannerState _invalidState;
   final List<Token<TokenType>> _tokens = [];
   final List<SyntaxError> errors = [];
-  final Map<Pattern, TokenType> patterns = {};
-  final List<Pattern> skip = [];
-  final TokenType illegalType;
-
-  BaseScanner(this.illegalType);
 
   List<Token<TokenType>> get tokens {
     if (errors.isEmpty)
@@ -27,10 +45,10 @@ class BaseScanner<TokenType> {
     }
   }
 
-  void _flush(SpanScanner scanner) {
+  void flush(SpanScanner scanner) {
     if (_invalidState != null) {
       var span = scanner.spanFrom(_invalidState);
-      var token = new Token(illegalType, span: span);
+      var token = new Token(TokenType.ILLEGAL, span: span);
       tokens.add(token);
       errors.add(new SyntaxError('Invalid input "${span.text}".',
           offendingToken: token));
@@ -42,21 +60,12 @@ class BaseScanner<TokenType> {
     var scanner = new SpanScanner(text, sourceUrl: sourceUrl);
 
     while (!scanner.isDone) {
-      bool skipped = false;
-
-      for (var pattern in skip) {
-        if (scanner.scan(pattern)) {
-          skipped = true;
-          break;
-        }
-      }
-
-      if (skipped)
+      if (scanner.scan(_WHITESPACE))
         continue;
       else {
         List<Token<TokenType>> potential = [];
 
-        patterns.forEach((k, v) {
+        _patterns.forEach((k, v) {
           if (scanner.matches(k))
             potential.add(new Token(v, span: scanner.lastSpan));
         });
@@ -65,7 +74,7 @@ class BaseScanner<TokenType> {
           if (_invalidState == null) _invalidState = scanner.state;
           scanner.readChar();
         } else {
-          _flush(scanner);
+          flush(scanner);
           potential.sort((a, b) => b.text.length.compareTo(a.text.length));
           var token = potential.first;
           tokens.add(token);
@@ -74,15 +83,6 @@ class BaseScanner<TokenType> {
       }
     }
 
-    _flush(scanner);
+    flush(scanner);
   }
-}
-
-abstract class AstNode<T> {
-  final List<Token<T>> tokens = [];
-  final SourceSpan span;
-
-  String get sourceText => tokens.map((t) => t.text).join();
-
-  AstNode([this.span]);
 }
