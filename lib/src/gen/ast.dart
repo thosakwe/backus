@@ -2,8 +2,8 @@ import 'dart:async';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:inflection/inflection.dart';
-import 'common.dart';
 import 'package:recase/recase.dart';
+import 'common.dart';
 
 class AstBuilder implements Builder {
   const AstBuilder();
@@ -58,7 +58,7 @@ class AstBuilder implements Builder {
         if (count == 1) {
           clazz.addField(varField(rc.camelCase, type: type));
         } else {
-          clazz.addField(varField(pluralize(rc.camelCase),
+          clazz.addField(varFinal(pluralize(rc.camelCase),
               type: new TypeBuilder('List', genericTypes: [type]),
               value: list([])));
         }
@@ -80,7 +80,7 @@ class AstBuilder implements Builder {
     return clazz;
   }
 
-  void countReferences(
+  static void countReferences(
       RightHandSideContext rhs, Map<String, int> fields, GeneratorContext ctx) {
     if (rhs is IdentifierContext && !rhs.name.startsWith('skip-')) {
       var ref = ctx.ruleNames[rhs.name];
@@ -108,7 +108,7 @@ class AstBuilder implements Builder {
     }
   }
 
-  void countDeepReferences(
+  static void countDeepReferences(
       RightHandSideContext rhs, Map<String, int> fields, GeneratorContext ctx) {
     if (rhs is IdentifierContext) {
       countReferences(rhs, fields, ctx);
@@ -128,7 +128,7 @@ class AstBuilder implements Builder {
     }
   }
 
-  void _increment(String name, Map<String, int> fields) {
+  static void _increment(String name, Map<String, int> fields) {
     if (fields.containsKey(name))
       fields[name]++;
     else
@@ -159,6 +159,15 @@ class AstBuilder implements Builder {
       }
     });
 
+    // Master `visit` method
+    // TODO: https://github.com/dart-lang/code_builder/issues/101
+    /*var masterVisit = new MethodBuilder('visit')
+      ..addPositional(parameter('ctx', [
+        new TypeBuilder('AstNode', genericTypes: [new TypeBuilder('String')])
+      ]));
+
+    clazz.addMethod(masterVisit);*/
+
     return clazz;
   }
 
@@ -174,7 +183,41 @@ class AstBuilder implements Builder {
               parameter('ctx', [new TypeBuilder('${rc.pascalCase}Context')]))
           ..addAnnotation(reference('override'));
         clazz.addMethod(m);
-        // TODO: Visit children...
+
+        Map<String, int> fields = {};
+        countReferences(rhs, fields, ctx);
+
+        fields.forEach((key, count) {
+          if (count > 0) {
+            var rhs = ctx.ruleNames[key];
+
+            if (!isTerminal(rhs)) {
+              var rc = new ReCase(key);
+
+              if (count == 1) {
+                m.addStatement(ifThen(
+                    reference('ctx')
+                        .property(rc.camelCase)
+                        .notEquals(literal(null)),
+                    [
+                      reference('visit${rc.pascalCase}')
+                          .call([reference('ctx').property(rc.camelCase)])
+                    ]));
+              } else {
+                m.addStatement(ifThen(
+                    reference('ctx')
+                        .property(pluralize(rc.camelCase))
+                        .property('isNotEmpty'),
+                    [
+                      new ForStatementBuilder.forEach(rc.camelCase,
+                          reference('ctx').property(pluralize(rc.camelCase)))
+                        ..addStatement(reference('visit${rc.pascalCase}')
+                            .call([reference(rc.camelCase)]))
+                    ]));
+              }
+            }
+          }
+        });
       }
     });
 

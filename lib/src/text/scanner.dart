@@ -2,7 +2,7 @@ import 'package:compiler_tools/compiler_tools.dart';
 import 'package:string_scanner/string_scanner.dart';
 import 'token_type.dart';
 
-final RegExp _COMMENT = new RegExp(r'\(\*(.|\n)*\*\)');
+final RegExp _COMMENT = new RegExp(r'\(\*([^\n])*\*\)');
 final RegExp _WHITESPACE = new RegExp(r'[ \r\t\n]+');
 final RegExp _TERMINAL1 = new RegExp(
     r'"((\\(["\\/bfnrt]|(u[0-9a-fA-F][0-9a-fA-F][0-9a-fA-F][0-9a-fA-F])))|([^"\\]))*"');

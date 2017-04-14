@@ -37,7 +37,8 @@ ExpressionBuilder terminalToExpression(RightHandSideContext rhs) {
     return literal(rhs.stringValue);
   else if (rhs is RegularExpressionContext)
     return new TypeBuilder('RegExp').newInstance([literal(rhs.pattern)]);
-  else throw new UnsupportedError('Unsupported terminal: $rhs');
+  else
+    throw new UnsupportedError('Unsupported terminal: $rhs');
 }
 
 GrammarContext parseGrammar(String text, sourceUrl) {
@@ -72,6 +73,7 @@ GrammarContext parseGrammar(String text, sourceUrl) {
 }
 
 class GeneratorContext {
+  final Map<String, int> _variables = {};
   final Map<String, RightHandSideContext> ruleNames = {};
 
   GeneratorContext._();
@@ -82,10 +84,32 @@ class GeneratorContext {
     return ctx;
   }
 
+  String variable(String root) {
+    int n;
+
+    if (_variables.containsKey(root))
+      n = ++_variables[root];
+    else
+      n = _variables[root] = 0;
+
+    return '_$root$n';
+  }
+
   void _populateRuleNames(GrammarContext grammar) {
     for (var rule in grammar.rules) {
       var name = rule.left.name.name;
       ruleNames[name] = rule.right;
     }
+  }
+
+  String currentVariable(String root) {
+    int n;
+
+    if (_variables.containsKey(root))
+      n = _variables[root];
+    else
+      n = _variables[root] = 0;
+
+    return '_$root$n';
   }
 }

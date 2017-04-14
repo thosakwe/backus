@@ -2,11 +2,13 @@ import 'dart:async';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:path/path.dart' as p;
-import 'common.dart';
 import 'package:recase/recase.dart';
+import 'common.dart';
 
 class ScannerBuilder implements Builder {
-  const ScannerBuilder();
+  final bool importIO;
+
+  const ScannerBuilder({this.importIO: false});
 
   @override
   List<AssetId> declareOutputs(AssetId inputId) =>
@@ -24,6 +26,9 @@ class ScannerBuilder implements Builder {
   LibraryBuilder compile(GrammarContext grammar, AssetId inputId) {
     var rc = getLibraryName(inputId);
     var lib = new LibraryBuilder('${rc.snakeCase}.scanner');
+
+    if (importIO == true) lib.addDirective(new ImportBuilder('dart:io'));
+
     lib.addDirective(new ImportBuilder('package:backus/backus.dart'));
     lib.addDirective(new ImportBuilder(
         p.basename(inputId.changeExtension('.tokens.g.dart').path)));
@@ -40,8 +45,21 @@ class ScannerBuilder implements Builder {
             genericTypes: [new TypeBuilder('String')]));
 
     // Add constructor to set illegal type
-    var c = new ConstructorBuilder(
-        invokeSuper: [new TypeBuilder('TokenType').property('ILLEGAL')]);
+    var c = new ConstructorBuilder(invokeSuper: [
+      new TypeBuilder('TokenType').property('ILLEGAL'),
+      reference('sourceUrl')
+    ])
+      ..addNamed(parameter('sourceUrl'));
+
+    // Add dump
+    var dump = new MethodBuilder('dump',
+        returnType: new TypeBuilder('void'),
+        returns: importIO == true
+            ? reference('stderr').invoke('writeln', [reference('text')])
+            : reference('print').call([reference('text')]))
+      ..addPositional(parameter('text', [new TypeBuilder('String')]))
+      ..addAnnotation(reference('override'));
+    clazz.addMethod(dump);
 
     // Initialize `patterns` map
     Map<ExpressionBuilder, ExpressionBuilder> patterns = {};

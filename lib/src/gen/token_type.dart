@@ -1,8 +1,8 @@
 import 'dart:async';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
-import 'common.dart';
 import 'package:recase/recase.dart';
+import 'common.dart';
 
 class TokenTypeBuilder implements Builder {
   const TokenTypeBuilder();
@@ -44,7 +44,7 @@ class TokenTypeBuilder implements Builder {
         clazz.addField(
             varConst(rc.constantCase,
                 type: new TypeBuilder('String'),
-                value: literal('TokenType::$name')),
+                value: literal('TokenType.${rc.constantCase}')),
             asStatic: true);
       }
     }

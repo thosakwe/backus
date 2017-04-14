@@ -2,6 +2,12 @@ library math.ast;
 
 import 'package:backus/backus.dart';
 
+class SumContext extends AstNode<String> {}
+
+abstract class SumContextVisitor {
+  visitSum(SumContext ctx);
+}
+
 class ExprContext extends AstNode<String> {
   SumContext sum;
 }
@@ -10,26 +16,22 @@ abstract class ExprContextVisitor {
   visitExpr(ExprContext ctx);
 }
 
-class SumContext extends AstNode<String> {
-  List<ExprContext> exprs = [];
-}
-
-abstract class SumContextVisitor {
+abstract class MathVisitor implements SumContextVisitor, ExprContextVisitor {
+  @override
   visitSum(SumContext ctx);
-}
 
-abstract class MathVisitor implements ExprContextVisitor, SumContextVisitor {
   @override
   visitExpr(ExprContext ctx);
-
-  @override
-  visitSum(SumContext ctx);
 }
 
 class MathBaseVisitor implements MathVisitor {
   @override
-  visitExpr(ExprContext ctx) {}
+  visitSum(SumContext ctx) {}
 
   @override
-  visitSum(SumContext ctx) {}
+  visitExpr(ExprContext ctx) {
+    if (ctx.sum != null) {
+      visitSum(ctx.sum);
+    }
+  }
 }

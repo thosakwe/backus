@@ -1,0 +1,9 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="repl.dart" type="DartCommandLineRunConfigurationType" factoryName="Dart Command Line Application" singleton="true" nameIsGenerated="true">
+    <option name="filePath" value="$PROJECT_DIR$/example/math/bin/repl.dart" />
+    <option name="workingDirectory" value="$PROJECT_DIR$/example/math" />
+    <method>
+      <option name="RunConfigurationTask" enabled="true" run_configuration_name="Build Math" run_configuration_type="DartCommandLineRunConfigurationType" />
+    </method>
+  </configuration>
+</component>

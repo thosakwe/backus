@@ -26,4 +26,7 @@ class TerminalContext extends RightHandSideContext {
             return m[0];
         }
       });
+
+  @override
+  String toString() => "Terminal (String): $text";
 }

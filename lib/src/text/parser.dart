@@ -58,16 +58,18 @@ class Parser extends BaseParser<TokenType> {
   }
 
   void eatComments() {
-    if (current == null && !eof()) read();
+    try {
+      if (current == null && !eof()) read();
 
-    if (current?.type == TokenType.COMMENT) {
-      while (!eof() && current?.type == TokenType.COMMENT) {
-        read();
-      }
-    } else {
-      try {
+      if (current?.type == TokenType.COMMENT) {
+        while (!eof() && current?.type == TokenType.COMMENT) {
+          read();
+        }
+      } else {
         while (peek()?.type == TokenType.COMMENT) read();
-      } catch (e) {}
+      }
+    } catch (e) {
+      //
     }
   }
 
@@ -270,14 +272,16 @@ class Parser extends BaseParser<TokenType> {
   }
 
   RegularExpressionContext parseRegularExpression() {
-    if (!next(TokenType.REGEX) && current?.type != TokenType.TERMINAL) return null;
+    if (!next(TokenType.REGEX) && current?.type != TokenType.TERMINAL)
+      return null;
     var expr = new RegularExpressionContext(util.getRegexPattern(current.text));
     eatComments();
     return expr;
   }
 
   TerminalContext parseTerminal() {
-    if (!next(TokenType.TERMINAL) && current?.type != TokenType.REGEX) return null;
+    if (!next(TokenType.TERMINAL) && current?.type != TokenType.REGEX)
+      return null;
     var expr = new TerminalContext(util.getTerminalText(current.text));
     eatComments();
     return expr;
