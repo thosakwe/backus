@@ -2,26 +2,34 @@ library math.ast;
 
 import 'package:backus/backus.dart';
 
-class ExprContext implements AstNode<String> {
+class ExprContext extends AstNode<String> {
   SumContext sum;
-
-  @override
-  String get sourceText => throw new UnsupportedError(
-      'ExprContext: Backus does not yet support retrieving AST node source text.');
 }
 
 abstract class ExprContextVisitor {
   visitExpr(ExprContext ctx);
 }
 
-class SumContext implements AstNode<String> {
+class SumContext extends AstNode<String> {
   List<ExprContext> exprs = [];
-
-  @override
-  String get sourceText => throw new UnsupportedError(
-      'SumContext: Backus does not yet support retrieving AST node source text.');
 }
 
 abstract class SumContextVisitor {
   visitSum(SumContext ctx);
+}
+
+abstract class MathVisitor implements ExprContextVisitor, SumContextVisitor {
+  @override
+  visitExpr(ExprContext ctx);
+
+  @override
+  visitSum(SumContext ctx);
+}
+
+class MathBaseVisitor implements MathVisitor {
+  @override
+  visitExpr(ExprContext ctx) {}
+
+  @override
+  visitSum(SumContext ctx) {}
 }

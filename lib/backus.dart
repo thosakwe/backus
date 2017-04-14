@@ -79,5 +79,7 @@ class BaseScanner<TokenType> {
 }
 
 abstract class AstNode<T> {
-  String get sourceText;
+  final List<Token<T>> tokens = [];
+
+  String get sourceText => tokens.map((t) => t.text).join();
 }

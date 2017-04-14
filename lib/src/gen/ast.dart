@@ -1,9 +1,7 @@
 import 'dart:async';
-import 'package:analyzer/dart/ast/ast.dart';
 import 'package:build/build.dart';
 import 'package:code_builder/code_builder.dart';
 import 'package:inflection/inflection.dart';
-import 'package:path/path.dart' as p;
 import 'common.dart';
 import 'package:recase/recase.dart';
 
@@ -36,15 +34,17 @@ class AstBuilder implements Builder {
       }
     });
 
-    return lib;
+    return lib
+      ..addMember(compileMasterVisitor(rc, ctx))
+      ..addMember(compileBaseVisitor(rc, ctx));
   }
 
   ClassBuilder compileContext(
       String name, RightHandSideContext rhs, GeneratorContext ctx) {
     var rc = new ReCase(name);
-    var clazz = new ClassBuilder('${rc.pascalCase}Context', asImplements: [
-      new TypeBuilder('AstNode', genericTypes: [new TypeBuilder('String')])
-    ]);
+    var clazz = new ClassBuilder('${rc.pascalCase}Context',
+        asExtends: new TypeBuilder('AstNode',
+            genericTypes: [new TypeBuilder('String')]));
 
     // Add fields if necessary, whether List or individual
     Map<String, int> fields = {};
@@ -65,16 +65,7 @@ class AstBuilder implements Builder {
       }
     });
 
-    // TODO: Add overridden get text
-    var sourceText = new MethodBuilder.getter('sourceText',
-        returnType: new TypeBuilder('String'),
-        returns: new TypeBuilder('UnsupportedError').newInstance([
-          literal(
-              '${rc.pascalCase}Context: Backus does not yet support retrieving AST node source text.')
-        ]).asThrow());
-    sourceText.addAnnotation(reference('override'));
-
-    return clazz..addMethod(sourceText);
+    return clazz;
   }
 
   ClassBuilder compileVisitor(
@@ -142,5 +133,51 @@ class AstBuilder implements Builder {
       fields[name]++;
     else
       fields[name] = 1;
+  }
+
+  ClassBuilder compileMasterVisitor(ReCase rc, GeneratorContext ctx) {
+    List<TypeBuilder> asImplements = [];
+
+    ctx.ruleNames.forEach((name, rhs) {
+      if (!isTerminal(rhs)) {
+        var rc = new ReCase(name);
+        asImplements.add(new TypeBuilder('${rc.pascalCase}ContextVisitor'));
+      }
+    });
+
+    var clazz = new ClassBuilder('${rc.pascalCase}Visitor',
+        asAbstract: true, asImplements: asImplements);
+
+    ctx.ruleNames.forEach((name, rhs) {
+      if (!isTerminal(rhs)) {
+        var rc = new ReCase(name);
+        clazz.addMethod(new MethodBuilder('visit${rc.pascalCase}',
+            asAbstract: true)
+          ..addPositional(
+              parameter('ctx', [new TypeBuilder('${rc.pascalCase}Context')]))
+          ..addAnnotation(reference('override')));
+      }
+    });
+
+    return clazz;
+  }
+
+  ClassBuilder compileBaseVisitor(ReCase rc, GeneratorContext ctx) {
+    var clazz = new ClassBuilder('${rc.pascalCase}BaseVisitor',
+        asImplements: [new TypeBuilder('${rc.pascalCase}Visitor')]);
+
+    ctx.ruleNames.forEach((name, rhs) {
+      if (!isTerminal(rhs)) {
+        var rc = new ReCase(name);
+        var m = new MethodBuilder('visit${rc.pascalCase}')
+          ..addPositional(
+              parameter('ctx', [new TypeBuilder('${rc.pascalCase}Context')]))
+          ..addAnnotation(reference('override'));
+        clazz.addMethod(m);
+        // TODO: Visit children...
+      }
+    });
+
+    return clazz;
   }
 }
