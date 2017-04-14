@@ -39,12 +39,14 @@ class TokenTypeBuilder implements Builder {
         asStatic: true);
 
     for (var name in ctx.ruleNames.keys) {
-      var rc = new ReCase(name);
-      clazz.addField(
-          varConst(rc.constantCase,
-              type: new TypeBuilder('String'),
-              value: literal('TokenType::$name')),
-          asStatic: true);
+      if (!name.startsWith('skip-')) {
+        var rc = new ReCase(name);
+        clazz.addField(
+            varConst(rc.constantCase,
+                type: new TypeBuilder('String'),
+                value: literal('TokenType::$name')),
+            asStatic: true);
+      }
     }
 
     return clazz;

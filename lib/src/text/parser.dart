@@ -57,6 +57,20 @@ class Parser extends BaseParser<TokenType> {
     };
   }
 
+  void eatComments() {
+    if (current == null && !eof()) read();
+
+    if (current?.type == TokenType.COMMENT) {
+      while (!eof() && current?.type == TokenType.COMMENT) {
+        read();
+      }
+    } else {
+      try {
+        while (peek()?.type == TokenType.COMMENT) read();
+      } catch (e) {}
+    }
+  }
+
   @override
   SyntaxError expectedType(TokenType type) {
     return error('Expected $type, \'${peek()?.text ?? "nothing"}\' found.');
@@ -64,6 +78,7 @@ class Parser extends BaseParser<TokenType> {
 
   GrammarContext parseGrammar() {
     final List<RuleContext> rules = [];
+    eatComments();
     RuleContext rule = parseRule();
 
     while (rule != null) {
@@ -82,6 +97,7 @@ class Parser extends BaseParser<TokenType> {
 
   RuleContext parseRule() {
     var left = parseLeftHandSide();
+    eatComments();
     if (left == null) return null;
 
     if (!next(TokenType.EQUALS)) {
@@ -111,6 +127,7 @@ class Parser extends BaseParser<TokenType> {
 
   LeftHandSideContext parseLeftHandSide() {
     var name = parseIdentifier();
+    eatComments();
     return name == null ? null : new LeftHandSideContext(name);
   }
 
@@ -124,6 +141,7 @@ class Parser extends BaseParser<TokenType> {
     }
 
     RightHandSideContext left = prefix(this, token);
+    eatComments();
 
     try {
       token = peek();
@@ -133,11 +151,14 @@ class Parser extends BaseParser<TokenType> {
         return left;
       else {
         read();
+        eatComments();
         var result = infix(this, left, token);
+        eatComments();
         // print('Infix created $result');
         return result;
       }
     } catch (e) {
+      eatComments();
       if (e is RangeError)
         return left;
       else
@@ -148,6 +169,7 @@ class Parser extends BaseParser<TokenType> {
   OptionalContext parseOptional() {
     if (!next(TokenType.SQUARE_L)) return null;
     var context = parseRightHandSide();
+    eatComments();
 
     if (context == null) {
       errors.add(new SyntaxError(
@@ -162,12 +184,14 @@ class Parser extends BaseParser<TokenType> {
       return null;
     }
 
+    eatComments();
     return new OptionalContext(context);
   }
 
   RepetitionContext parseRepetition() {
     if (!next(TokenType.CURLY_L)) return null;
     var context = parseRightHandSide();
+    eatComments();
 
     if (context == null) {
       errors.add(new SyntaxError(
@@ -180,12 +204,15 @@ class Parser extends BaseParser<TokenType> {
       errors.add(expectedType(TokenType.CURLY_R));
       return null;
     }
+
+    eatComments();
     return new RepetitionContext(context);
   }
 
   GroupContext parseGroup() {
     if (!next(TokenType.PAREN_L)) return null;
     var context = parseRightHandSide();
+    eatComments();
 
     if (context == null) {
       errors.add(new SyntaxError(
@@ -200,14 +227,17 @@ class Parser extends BaseParser<TokenType> {
       return null;
     }
 
+    eatComments();
     return new GroupContext(context);
   }
 
   AlternationContext parseAlternation() {
     var left = parseRightHandSide();
+    eatComments();
     if (left == null) return null;
     if (!next(TokenType.PIPE)) return null;
     var right = parseRightHandSide();
+    eatComments();
 
     if (right == null) {
       errors.add(new SyntaxError(
@@ -216,14 +246,17 @@ class Parser extends BaseParser<TokenType> {
       return null;
     }
 
+    eatComments();
     return new AlternationContext(left, right);
   }
 
   ConcatenationContext parseConcatenation() {
     var left = parseRightHandSide();
+    eatComments();
     if (left == null) return null;
     if (!next(TokenType.COMMA)) return null;
     var right = parseRightHandSide();
+    eatComments();
 
     if (right == null) {
       errors.add(new SyntaxError(
@@ -232,21 +265,28 @@ class Parser extends BaseParser<TokenType> {
       return null;
     }
 
+    eatComments();
     return new ConcatenationContext(left, right);
   }
 
   RegularExpressionContext parseRegularExpression() {
-    if (!next(TokenType.REGEX)) return null;
-    return new RegularExpressionContext(util.getRegexPattern(current.text));
+    if (!next(TokenType.REGEX) && current?.type != TokenType.TERMINAL) return null;
+    var expr = new RegularExpressionContext(util.getRegexPattern(current.text));
+    eatComments();
+    return expr;
   }
 
   TerminalContext parseTerminal() {
-    if (!next(TokenType.TERMINAL)) return null;
-    return new TerminalContext(util.getTerminalText(current.text));
+    if (!next(TokenType.TERMINAL) && current?.type != TokenType.REGEX) return null;
+    var expr = new TerminalContext(util.getTerminalText(current.text));
+    eatComments();
+    return expr;
   }
 
   IdentifierContext parseIdentifier() {
-    if (!next(TokenType.ID)) return null;
-    return new IdentifierContext(current.text);
+    if (!next(TokenType.ID) && current?.type != TokenType.ID) return null;
+    var expr = new IdentifierContext(current.text);
+    eatComments();
+    return expr;
   }
 }

@@ -49,7 +49,7 @@ class Scanner {
     if (_invalidState != null) {
       var span = scanner.spanFrom(_invalidState);
       var token = new Token(TokenType.ILLEGAL, span: span);
-      tokens.add(token);
+      _tokens.add(token);
       errors.add(new SyntaxError('Invalid input "${span.text}".',
           offendingToken: token));
       _invalidState = null;
@@ -77,7 +77,7 @@ class Scanner {
           flush(scanner);
           potential.sort((a, b) => b.text.length.compareTo(a.text.length));
           var token = potential.first;
-          tokens.add(token);
+          _tokens.add(token);
           scanner.scan(token.text);
         }
       }

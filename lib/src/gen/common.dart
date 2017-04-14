@@ -45,7 +45,7 @@ GrammarContext parseGrammar(String text, sourceUrl) {
 
   if (scanner.errors.isNotEmpty) {
     stderr.writeln(
-        'Compilation of "$sourceUrl" failed. ${scanner.errors.length} syntax error(s) were found:');
+        'Compilation of "$sourceUrl" failed. ${scanner.errors.length} syntax error(s) found:');
 
     for (var error in scanner.errors) {
       stderr.writeln('  * $error');
@@ -59,7 +59,7 @@ GrammarContext parseGrammar(String text, sourceUrl) {
 
   if (parser.errors.isNotEmpty) {
     stderr.writeln(
-        'Compilation of "$sourceUrl" failed. ${scanner.errors.length} syntax error(s) were found:');
+        'Compilation of "$sourceUrl" failed. ${parser.errors.length} syntax error(s) found:');
 
     for (var error in parser.errors) {
       stderr.writeln('  * $error');

@@ -1,4 +1,8 @@
+(* To skip a pattern, prefix it with "skip-". *)
 skip-whitespace = /[ \n\r\t]+/;
+
+digit = /[0-9]+/;
 plus = "+";
+
 expr = digit | sum;
 sum = expr, plus, expr;

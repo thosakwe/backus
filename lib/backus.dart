@@ -79,10 +79,5 @@ class BaseScanner<TokenType> {
 }
 
 abstract class AstNode<T> {
-  final List<Token<T>> tokens = [];
-  final SourceSpan span;
-
-  String get sourceText => tokens.map((t) => t.text).join();
-
-  AstNode([this.span]);
+  String get sourceText;
 }
