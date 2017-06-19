@@ -1,13 +1,11 @@
+import 'dart:io';
 import 'package:backus/src/gen/build_grammar.dart';
 import 'package:test/test.dart';
 
 main() {
-  test('do', () async {
-    var grammar = await buildGrammar('foo = "bar";', Uri.parse('/Users/bar/baz.ebnf'));
+  test('json', () async {
+    var file = new File('test/grammars/json.ebnf');
+    var grammar = await buildGrammar(await file.readAsString(), file.uri);
     print(grammar.rules);
-  });
-
-  test('error', () async {
-    var grammar = await buildGrammar('foo: 34', Uri.parse('/Users/bar/baz.ebnf'));
   });
 }

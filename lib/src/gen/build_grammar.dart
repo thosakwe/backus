@@ -20,7 +20,7 @@ void friendlyPrintError(SyntaxError error, String filePath) {
 }
 
 Future<Grammar> buildGrammar(String contents, Uri sourceUrl) async {
-  var name = new ReCase(p.basenameWithoutExtension(sourceUrl.path)).pascalCase;
+  var name = new ReCase(p.basenameWithoutExtension(sourceUrl.path));
   var grammar = new Grammar(name);
   var scanner = new Scanner()..scan(contents, sourceUrl: sourceUrl);
 
@@ -43,6 +43,11 @@ Future<Grammar> buildGrammar(String contents, Uri sourceUrl) async {
     var name = rule.left.name.name;
     grammar.rules[name] = rule.right;
   }
+
+  grammar.rules.forEach((name, rhs) {
+    if (grammar.isTerminal(rhs))
+      grammar.tokenType(name);
+  });
 
   return grammar;
 }

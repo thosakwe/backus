@@ -22,6 +22,8 @@ class TerminalContext extends RightHandSideContext {
             return '\t';
           case 'b':
             return '\b';
+          case 'f':
+            return '\f';
           default:
             return m[0];
         }
@@ -29,4 +31,7 @@ class TerminalContext extends RightHandSideContext {
 
   @override
   String toString() => "Terminal (String): $text";
+
+  @override
+  bool get isScannerRule => true;
 }
