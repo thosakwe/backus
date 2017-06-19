@@ -6,7 +6,7 @@
 .project
 .pub/
 .scripts-bin/
-build/
+build
 **/packages/
 
 # Files created by dart2js

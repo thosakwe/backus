@@ -1,3 +1,0 @@
-plus = "+";
-expr = digit | sum;
-sum = expr, plus, expr;
