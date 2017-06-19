@@ -13,10 +13,8 @@
       <excludeFolder url="file://$MODULE_DIR$/example/json/lib/text/packages" />
       <excludeFolder url="file://$MODULE_DIR$/example/json/packages" />
       <excludeFolder url="file://$MODULE_DIR$/example/json/tool/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/example/math/.dart_tool/build/dd4414922f79466dd98ddb1e3f01db39/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/example/math/.dart_tool/build/packages" />
-      <excludeFolder url="file://$MODULE_DIR$/example/math/.dart_tool/packages" />
       <excludeFolder url="file://$MODULE_DIR$/example/math/.pub" />
+      <excludeFolder url="file://$MODULE_DIR$/example/math/bin/packages" />
       <excludeFolder url="file://$MODULE_DIR$/example/math/build" />
       <excludeFolder url="file://$MODULE_DIR$/example/math/lib/packages" />
       <excludeFolder url="file://$MODULE_DIR$/example/math/lib/text/packages" />
